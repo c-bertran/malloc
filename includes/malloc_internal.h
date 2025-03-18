@@ -2,10 +2,11 @@
 #define MALLOC_INTERNAL_H
 
 #include <sys/mman.h>
-#include <pthread.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <sys/resource.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <limits.h>
+#include <pthread.h>
 
 /* Size definitions */
 #define TINY_MAX_SIZE 128
@@ -33,7 +34,7 @@ typedef struct s_block {
     bool is_free;             /* Indicates if block is free */
     struct s_block *next;     /* Next block in the zone */
     struct s_block *prev;     /* Previous block in the zone */
-    uint32_t magic;           /* Magic number for validation */
+    __uint32_t magic;           /* Magic number for validation */
     /* Padding for alignment */
     char padding[0];          /* Start of user data */
 } t_block;

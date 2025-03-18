@@ -1,10 +1,7 @@
 #ifndef FT_MALLOC_H
 #define FT_MALLOC_H
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <pthread.h>
+#include <sys/types.h>
 
 /**
  * @brief Allocates memory of the specified size

@@ -1,6 +1,5 @@
 #include "malloc.h"
 #include "malloc_internal.h"
-#include <string.h>
 
 /**
  * @brief Find a suitable free block in a zone
@@ -37,7 +36,7 @@ static bool split_if_necessary(t_block *block, size_t size) {
         t_block *new_block = (t_block *)((char *)block + sizeof(t_block) + size);
         new_block->size = block->size - size - sizeof(t_block);
         new_block->is_free = true;
-        new_block->magic = 0x12345678; // Magic number for validation
+        new_block->magic = MAGIC_NUMBER;
         
         // Update linked list
         new_block->next = block->next;
