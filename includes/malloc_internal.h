@@ -8,6 +8,9 @@
 #include <limits.h>
 #include <pthread.h>
 
+/* Debug flag */
+#define DEBUG_MALLOC 1 
+
 /* Size definitions */
 #define TINY_MAX_SIZE 128
 #define SMALL_MAX_SIZE 1024
@@ -72,6 +75,13 @@ bool init_malloc(void);
 zone_type_t get_zone_type(size_t size);
 
 /**
+ * @brief Core allocation function
+ * @param size Size requested by user
+ * @return Pointer to allocated memory or NULL on failure
+ */
+void *internal_allocation_logic(size_t size);
+
+/**
  * @brief Create a new zone of specified type
  * @param type Zone type
  * @param size Size needed (used for LARGE zones)
@@ -80,19 +90,20 @@ zone_type_t get_zone_type(size_t size);
 t_zone *create_zone(zone_type_t type, size_t size);
 
 /**
- * @brief Find a free block of at least specified size
- * @param size Minimum block size needed
- * @return Pointer to free block header, or NULL if none found
+ * @brief Find a suitable free block in a zone
+ * @param zone Zone to search
+ * @param size Size needed
+ * @return Pointer to block header if found, NULL otherwise
  */
-t_block *find_free_block(size_t size);
+t_block *find_free_block_in_zone(t_zone *zone, size_t size);
 
 /**
- * @brief Split a block if it's too large for the requested size
+ * @brief Split block if it's significantly larger than needed
  * @param block Block to split
- * @param requested_size Size needed
- * @return Pointer to the original block (now resized)
+ * @param size Size needed
+ * @return true if split was performed, false otherwise
  */
-t_block *split_block(t_block *block, size_t requested_size);
+bool split_block(t_block *block, size_t size);
 
 /**
  * @brief Merge adjacent free blocks to reduce fragmentation
@@ -116,13 +127,6 @@ t_zone *find_zone_for_ptr(void *ptr);
 t_block *get_block_from_ptr(void *ptr);
 
 /**
- * @brief Calculate the total size needed including metadata
- * @param size User requested size
- * @return Total allocation size
- */
-size_t calculate_total_size(size_t size);
-
-/**
  * @brief Align size to system word boundary
  * @param size Size to align
  * @return Aligned size
@@ -144,4 +148,4 @@ bool is_valid_ptr(void *ptr);
  */
 void log_operation(const char *operation, void *ptr, size_t size);
 
-#endif /* MALLOC_INTERNAL_H */
+#endif

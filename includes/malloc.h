@@ -1,6 +1,5 @@
 #ifndef FT_MALLOC_H
 #define FT_MALLOC_H
-
 #include <sys/types.h>
 
 /**
@@ -71,4 +70,4 @@ void show_alloc_mem(void);
  */
 void show_alloc_mem_ex(void);
 
-#endif /* FT_MALLOC_H */
+#endif

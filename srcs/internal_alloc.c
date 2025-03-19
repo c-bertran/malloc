@@ -7,7 +7,7 @@
  * @param size Size needed
  * @return Pointer to block header if found, NULL otherwise
  */
-static t_block *find_free_block_in_zone(t_zone *zone, size_t size) {
+t_block *find_free_block_in_zone(t_zone *zone, size_t size) {
     t_block *current = zone->blocks;
     
     while (current) {
@@ -26,7 +26,7 @@ static t_block *find_free_block_in_zone(t_zone *zone, size_t size) {
  * @param size Size needed
  * @return true if split was performed, false otherwise
  */
-static bool split_if_necessary(t_block *block, size_t size) {
+bool split_block(t_block *block, size_t size) {
     // Minimum size worth splitting (header size + minimum useful fragment)
     size_t min_split_size = sizeof(t_block) + 16;
     
@@ -55,6 +55,24 @@ static bool split_if_necessary(t_block *block, size_t size) {
     return false;
 }
 
+t_block *merge_blocks(t_block *block) {
+    t_block *current = block;
+    
+    while (current->prev && current->prev->is_free) {
+        current = current->prev;
+    }
+    
+    while (current->next && current->next->is_free) {
+        current->size += sizeof(t_block) + current->next->size;
+        current->next = current->next->next;
+        if (current->next) {
+            current->next->prev = current;
+        }
+    }
+    
+    return current;
+}
+
 /**
  * @brief Core allocation function
  * @param size Size requested by user
@@ -62,6 +80,7 @@ static bool split_if_necessary(t_block *block, size_t size) {
  */
 void *internal_allocation_logic(size_t size) {
     if (size == 0) {
+        log_operation("internal_alloc", NULL, 0);
         return NULL;
     }
     
@@ -89,7 +108,8 @@ void *internal_allocation_logic(size_t size) {
     if (!free_block) {
         current_zone = create_zone(zone_type, aligned_size);
         if (!current_zone) {
-            return NULL; // Failed to create zone
+            log_operation("create_zone", (void*)current_zone, aligned_size);
+            return NULL;
         }
         
         // Add new zone to front of zones list
@@ -104,7 +124,7 @@ void *internal_allocation_logic(size_t size) {
     free_block->is_free = false;
     
     // Split block if it's much larger than needed
-    split_if_necessary(free_block, aligned_size);
+    split_block(free_block, aligned_size);
     
     // Update zone metadata
     current_zone->free_space -= free_block->size;

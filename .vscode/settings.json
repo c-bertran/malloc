@@ -1,9 +1,12 @@
 {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": false,
     "files.associations": {
         "malloc_internal.h": "c",
         "string.h": "c",
         "resource.h": "c",
         "pthread.h": "c",
-        "mman.h": "c"
+        "mman.h": "c",
+        "malloc.h": "c"
     }
 }

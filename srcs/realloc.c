@@ -4,11 +4,16 @@
 void *realloc(void *ptr, size_t size)
 {
     // Case 1: If ptr is NULL, behave like malloc
-    if (!ptr)
-        return malloc(size);
+    if (!ptr) {
+        void *ret = malloc(size);
+        log_operation("realloc-null", ret, size);
+        return ret;
+    }
+        
         
     // Case 2: If size is 0, behave like free and return NULL
     if (size == 0) {
+        log_operation("realloc-zero", ptr, 0);
         free(ptr);
         return NULL;
     }
@@ -18,12 +23,14 @@ void *realloc(void *ptr, size_t size)
     // Validate the pointer
     t_zone *zone = find_zone_for_ptr(ptr);
     if (!zone) {
+        log_operation("realloc-invalid", ptr, size);
         pthread_mutex_unlock(&g_malloc_mutex);
         return NULL;  // Invalid pointer
     }
     
     t_block *block = get_block_from_ptr(ptr);
     if (!block || block->magic != MAGIC_NUMBER || block->is_free) {
+        log_operation("realloc-invalid", ptr, size);
         pthread_mutex_unlock(&g_malloc_mutex);
         return NULL;  // Invalid block
     }
@@ -33,6 +40,7 @@ void *realloc(void *ptr, size_t size)
     
     // Case 3: Same size, return the same pointer
     if (aligned_size == block->size) {
+        log_operation("realloc-same", ptr, size);
         pthread_mutex_unlock(&g_malloc_mutex);
         return ptr;
     }
@@ -40,7 +48,7 @@ void *realloc(void *ptr, size_t size)
     // Case 4: Smaller size, shrink the block
     if (aligned_size < block->size) {
         // Try to split the block
-        split_if_necessary(block, aligned_size);
+        split_block(block, aligned_size);
         pthread_mutex_unlock(&g_malloc_mutex);
         return ptr;
     }
@@ -57,7 +65,7 @@ void *realloc(void *ptr, size_t size)
             block->next->prev = block;
             
         // If resulting block is much larger, split it
-        split_if_necessary(block, aligned_size);
+        split_block(block, aligned_size);
         
         pthread_mutex_unlock(&g_malloc_mutex);
         return ptr;
@@ -83,5 +91,7 @@ void *realloc(void *ptr, size_t size)
     // Free old block
     free(ptr);
     
+    log_operation("realloc", new_ptr, size);
+
     return new_ptr;
 }

@@ -3,21 +3,28 @@
 
 void free(void *ptr)
 {
-    if (!ptr)
+    if (!ptr) {
+        log_operation("free", NULL, 0);
         return;
+    }
     pthread_mutex_lock(&g_malloc_mutex);
     t_zone *zone = find_zone_for_ptr(ptr);
     if (!zone)
     {
+        log_operation("free-invalid", ptr, 0);
         pthread_mutex_unlock(&g_malloc_mutex);
         return;
     }
     t_block *block = get_block_from_ptr(ptr);
     if (!block || block->magic != MAGIC_NUMBER || block->is_free)
     {
+        log_operation("free-invalid", ptr, 0);
         pthread_mutex_unlock(&g_malloc_mutex);
         return;
     }
+
+    log_operation("free", ptr, 0);
+
     // Handle large allocations differently
     if (zone->type == ZONE_LARGE) {
         // Remove from zone list
@@ -43,7 +50,7 @@ void free(void *ptr)
         zone->used_blocks--;
         
         // Try to merge with adjacent blocks
-        merge_adjacent_blocks(block);  // No zone parameter needed
+        merge_blocks(block);
     }
     
     pthread_mutex_unlock(&g_malloc_mutex);

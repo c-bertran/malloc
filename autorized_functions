@@ -1,8 +1,0 @@
-malloc
-free
-write
-mmap
-munmap
-sysconf(_SC_PAGESIZE) 
-getrlimit
-libpthread all functions
