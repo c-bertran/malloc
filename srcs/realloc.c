@@ -10,7 +10,6 @@ void *realloc(void *ptr, size_t size)
         return ret;
     }
         
-        
     // Case 2: If size is 0, behave like free and return NULL
     if (size == 0) {
         log_operation("realloc-zero", ptr, 0);
