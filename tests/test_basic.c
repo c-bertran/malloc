@@ -2,6 +2,15 @@
 #include <string.h>
 #include <assert.h>
 #include "../includes/malloc.h"
+#include "../includes/malloc_internal.h"
+
+void print_debug_info(void *ptr) {
+    printf("DEBUG: User ptr = %p\n", ptr);
+    t_block *block = get_block_from_ptr(ptr);
+    printf("DEBUG: Block ptr = %p\n", block);
+    printf("DEBUG: Block size = %zu\n", block->size);
+    printf("DEBUG: Block magic = 0x%x\n", block->magic);
+}
 
 // Test basic malloc and free
 void test_simple_malloc_free() {
@@ -22,6 +31,7 @@ void test_simple_malloc_free() {
     }
     
     // Free memory
+    print_debug_info(ptr);
     free(ptr);
     printf("PASSED: Simple malloc and free\n");
 }
@@ -40,6 +50,7 @@ void test_calloc() {
     }
     
     // Free memory
+    print_debug_info(ptr);
     free(ptr);
     printf("PASSED: Calloc initialization\n");
 }
@@ -81,6 +92,7 @@ void test_realloc() {
     }
     
     // Free memory
+    print_debug_info(new_ptr);
     free(new_ptr);
     printf("PASSED: Realloc functionality\n");
 }
@@ -93,6 +105,7 @@ void test_allocation_sizes() {
     char *tiny = (char *)malloc(64);
     assert(tiny != NULL);
     strcpy(tiny, "Tiny allocation test");
+    print_debug_info(tiny);
     free(tiny);
     
     // Test small allocations (128-1024 bytes)
@@ -100,6 +113,7 @@ void test_allocation_sizes() {
     assert(small != NULL);
     memset(small, 'A', 511);
     small[511] = '\0';
+    print_debug_info(small);
     free(small);
     
     // Test large allocations (>1024 bytes)
@@ -107,6 +121,7 @@ void test_allocation_sizes() {
     assert(large != NULL);
     memset(large, 'B', 2047);
     large[2047] = '\0';
+    print_debug_info(large);
     free(large);
     
     printf("PASSED: Various allocation sizes\n");

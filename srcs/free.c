@@ -11,14 +11,14 @@ void free(void *ptr)
     t_zone *zone = find_zone_for_ptr(ptr);
     if (!zone)
     {
-        log_operation("free-invalid", ptr, 0);
+        log_operation("free-invalid - zone", ptr, 0);
         pthread_mutex_unlock(&g_malloc_mutex);
         return;
     }
     t_block *block = get_block_from_ptr(ptr);
     if (!block || block->magic != MAGIC_NUMBER || block->is_free)
     {
-        log_operation("free-invalid", ptr, 0);
+        log_operation("free-invalid - block", ptr, 0);
         pthread_mutex_unlock(&g_malloc_mutex);
         return;
     }

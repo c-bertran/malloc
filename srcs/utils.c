@@ -24,9 +24,8 @@ t_zone *find_zone_for_ptr(void *ptr) {
 
 // Calculate block address from user pointer
 t_block *get_block_from_ptr(void *ptr) {
-    // User pointer is at block->padding
-    size_t padding_offset = sizeof(t_block);
-    return (t_block *)((char *)ptr - padding_offset);
+    // Calculate the offset to the padding field
+    return (t_block *)((char *)ptr - ((size_t)&((t_block *)0)->padding));
 }
 
 bool is_valid_ptr(void *ptr) {

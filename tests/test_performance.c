@@ -3,6 +3,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 #include "../includes/malloc.h"
 
 #define NUM_ALLOCS 10000

@@ -73,15 +73,19 @@ void test_large_allocations() {
 // Test double free detection (should not crash)
 void test_double_free() {
     printf("Testing double free behavior...\n");
-    
-    void *ptr = malloc(10);
-    assert(ptr != NULL);
-    
-    free(ptr);  // Valid free
-    
-    // This second free should be detected and ignored
-    // Should not crash, but might print an error
-    free(ptr);
+   
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wuse-after-free"
+    {
+        void *ptr = malloc(10);
+        assert(ptr != NULL);
+
+        free(ptr);  // Valid free
+        // This second free should be detected and ignored
+        // Should not crash, but might print an error
+        free(ptr);
+    }
+    #pragma GCC diagnostic pop
     
     printf("PASSED: Double free handling\n");
 }
@@ -90,20 +94,28 @@ void test_double_free() {
 void test_invalid_free() {
     printf("Testing invalid free behavior...\n");
     
-    // Create a pointer that was never allocated
-    char stack_var[10];
-    void *invalid_ptr = stack_var;
-    
-    // This free should be detected and ignored
-    // Should not crash, but might print an error
-    free(invalid_ptr);
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wfree-nonheap-object"
+    {
+        char stack_var[10];
+        void *invalid_ptr = stack_var;
+        // This free should be detected and ignored
+         // Should not crash, but might print an error
+        free(invalid_ptr);
+    }
+    #pragma GCC diagnostic pop
     
     // Create a pointer that's in the middle of an allocation
     void *ptr = malloc(100);
     assert(ptr != NULL);
     
-    void *offset_ptr = (char*)ptr + 10;
-    free(offset_ptr);  // Should be detected as invalid
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wfree-nonheap-object"
+    {
+        void *offset_ptr = (char*)ptr + 10;
+        free(offset_ptr);  // Should be detected as invalid
+    }
+    #pragma GCC diagnostic pop
     
     // Clean up valid pointer
     free(ptr);

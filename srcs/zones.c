@@ -2,17 +2,9 @@
 #include "malloc_internal.h"
 
 bool init_malloc(void) {
-    // Initialize TINY and SMALL zones
     t_zone *tiny_zone = create_zone(ZONE_TINY, 0);
     if (!tiny_zone)
         return false;
-    t_zone *small_zone = create_zone(ZONE_SMALL, 0);
-    if (!small_zone) {
-        // Free tiny_zone - we need to implement cleanup
-        return false;
-    }
-    // Add zones to global list
-    tiny_zone->next = small_zone;
     g_zones = tiny_zone;
     return true;
 }
