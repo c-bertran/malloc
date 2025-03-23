@@ -1,12 +1,15 @@
 {
-    "editor.tabSize": 2,
-    "editor.insertSpaces": false,
-    "files.associations": {
-        "malloc_internal.h": "c",
-        "string.h": "c",
-        "resource.h": "c",
-        "pthread.h": "c",
-        "mman.h": "c",
-        "malloc.h": "c"
-    }
+	"editor.tabSize": 2,
+	"editor.insertSpaces": false,
+	"files.associations": {
+		"malloc_internal.h": "c",
+		"string.h": "c",
+		"resource.h": "c",
+		"pthread.h": "c",
+		"mman.h": "c",
+		"malloc.h": "c"
+	},
+	"editor.detectIndentation": false,
+	"editor.formatOnSave": true,
+	"C_Cpp.clang_format_path": "/usr/bin/clang-format"
 }

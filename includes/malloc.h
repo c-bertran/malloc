@@ -27,8 +27,8 @@ void free(void *ptr);
  * @brief Changes the size of a previously allocated memory block
  *
  * This function tries to change the size of the allocation pointed to by ptr
- * to size bytes and returns ptr. If there is not enough room to enlarge the 
- * memory allocation, a new allocation is created, data is copied, the old 
+ * to size bytes and returns ptr. If there is not enough room to enlarge the
+ * memory allocation, a new allocation is created, data is copied, the old
  * allocation is freed, and a pointer to the new allocation is returned.
  *
  * @param ptr Pointer to previously allocated memory
@@ -40,8 +40,9 @@ void *realloc(void *ptr, size_t size);
 /**
  * @brief Allocates memory for an array and initializes it to zero
  *
- * This function allocates memory for an array of nmemb elements of size bytes each
- * and returns a pointer to the allocated memory. The memory is set to zero.
+ * This function allocates memory for an array of nmemb elements of size bytes
+ * each and returns a pointer to the allocated memory. The memory is set to
+ * zero.
  *
  * @param nmemb Number of elements
  * @param size Size in bytes of each element

@@ -1,0 +1,14 @@
+UseTab: ForIndentation
+TabWidth: 2
+IndentWidth: 2
+ContinuationIndentWidth: 2
+BraceWrapping:
+  AfterFunction: false
+  AfterClass: false
+  AfterControlStatement: false
+  AfterNamespace: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+
+BasedOnStyle: LLVM

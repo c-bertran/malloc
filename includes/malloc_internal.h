@@ -1,15 +1,14 @@
 #ifndef MALLOC_INTERNAL_H
 #define MALLOC_INTERNAL_H
-
+#include <limits.h>
+#include <pthread.h>
+#include <stdbool.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <pthread.h>
 
 /* Debug flag */
-#define DEBUG_MALLOC 1 
+#define DEBUG_MALLOC 1
 
 /* Size definitions */
 #define TINY_MAX_SIZE 128
@@ -22,41 +21,39 @@
 #define MAGIC_NUMBER 0xDEADBEEF
 
 /* Zone types */
-typedef enum {
-    ZONE_TINY,
-    ZONE_SMALL,
-    ZONE_LARGE
-} zone_type_t;
+typedef enum { ZONE_TINY, ZONE_SMALL, ZONE_LARGE } zone_type_t;
 
-/* 
+/*
  * Memory block header structure
  * Must be aligned to ensure proper alignment of user data
  */
 typedef struct s_block {
-    size_t size;              /* Size of the data area */
-    bool is_free;             /* Indicates if block is free */
-    struct s_block *next;     /* Next block in the zone */
-    struct s_block *prev;     /* Previous block in the zone */
-    __uint32_t magic;           /* Magic number for validation */
-    /* Padding for alignment */
-    char padding[0];          /* Start of user data */
+	size_t size;          /* Size of the data area */
+	bool is_free;         /* Indicates if block is free */
+	struct s_block *next; /* Next block in the zone */
+	struct s_block *prev; /* Previous block in the zone */
+	__uint32_t magic;     /* Magic number for validation */
+	/* Padding for alignment */
+	char padding[0]; /* Start of user data */
 } t_block;
 
-/* 
+#define BLOCK_HEADER_SIZE ((size_t)(&((t_block *)0)->padding))
+
+/*
  * Zone structure - manages a contiguous memory region
  */
 typedef struct s_zone {
-    void *start;              /* Start address of zone memory */
-    size_t total_size;        /* Total zone size in bytes */
-    zone_type_t type;         /* Zone type (TINY, SMALL, LARGE) */
-    struct s_zone *next;      /* Next zone in list */
-    size_t free_space;        /* Available space in zone */
-    size_t used_blocks;       /* Number of allocated blocks */
-    t_block *blocks;          /* Pointer to first block in zone */
+	void *start;         /* Start address of zone memory */
+	size_t total_size;   /* Total zone size in bytes */
+	zone_type_t type;    /* Zone type (TINY, SMALL, LARGE) */
+	struct s_zone *next; /* Next zone in list */
+	size_t free_space;   /* Available space in zone */
+	size_t used_blocks;  /* Number of allocated blocks */
+	t_block *blocks;     /* Pointer to first block in zone */
 } t_zone;
 
 /* Global variables */
-extern t_zone *g_zones;       /* Head of zones list */
+extern t_zone *g_zones;                /* Head of zones list */
 extern pthread_mutex_t g_malloc_mutex; /* Mutex for thread safety */
 
 /* Internal helper functions */
