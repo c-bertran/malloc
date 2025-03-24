@@ -14,13 +14,13 @@ OBJS_DIR = objs
 
 # Source files
 SRCS = $(SRCS_DIR)/malloc.c \
-	   $(SRCS_DIR)/free.c \
-	   $(SRCS_DIR)/realloc.c \
-	   $(SRCS_DIR)/calloc.c \
-	   $(SRCS_DIR)/zones.c \
-	   $(SRCS_DIR)/internal_alloc.c \
-	   $(SRCS_DIR)/show_alloc_mem.c \
-	   $(SRCS_DIR)/utils.c
+	$(SRCS_DIR)/free.c \
+	$(SRCS_DIR)/realloc.c \
+	$(SRCS_DIR)/calloc.c \
+	$(SRCS_DIR)/zones.c \
+	$(SRCS_DIR)/internal_alloc.c \
+	$(SRCS_DIR)/show_alloc_mem.c \
+	$(SRCS_DIR)/utils.c
 
 # Object files
 OBJS = $(SRCS:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)

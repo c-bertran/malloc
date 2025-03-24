@@ -10,15 +10,15 @@ all: basic edge performance
 # Test targets
 basic: test_basic
 	@echo "Running basic tests..."
-	@env LD_LIBRARY_PATH=.. ./test_basic > log/basic.log 2>&1
+	@env LD_LIBRARY_PATH=.. ./test_basic
 
 edge: test_edge_cases
 	@echo "Running edge case tests..."
-	@env LD_LIBRARY_PATH=.. ./test_edge_cases > log/edge.log 2>&1
+	@env LD_LIBRARY_PATH=.. ./test_edge_cases
 
 performance: test_performance
 	@echo "Running performance tests..."
-	@env LD_LIBRARY_PATH=.. ./test_performance > log/perf.log 2>&1
+	@env LD_LIBRARY_PATH=.. ./test_performance
 
 # Build test executables
 test_basic: test_basic.c

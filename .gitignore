@@ -1,4 +1,4 @@
-objs/*
+objs
 authorized_functions
 libft_malloc*.so
 *.pdf
