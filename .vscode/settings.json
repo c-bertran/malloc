@@ -12,7 +12,11 @@
 		"assert.h": "c",
 		"types.h": "c",
 		"stdbool.h": "c",
-		"stdint.h": "c"
+		"stdint.h": "c",
+		"array": "c",
+		"string_view": "c",
+		"initializer_list": "c",
+		"unistd.h": "c"
 	},
 	"editor.detectIndentation": false,
 	"editor.formatOnSave": true,

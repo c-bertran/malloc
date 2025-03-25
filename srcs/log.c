@@ -1,6 +1,6 @@
 #include "malloc_internal.h"
 
-void log(const char *operation, void *ptr, size_t size) {
+void logger(const char *operation, void *ptr, size_t size) {
 #if DEBUG_MALLOC
 	// Buffer for building log message
 	char buffer[256];

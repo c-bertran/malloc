@@ -2,7 +2,6 @@ objs
 authorized_functions
 libft_malloc*.so
 *.pdf
-tests/test_basic
-tests/test_edge_cases
-tests/test_performance
-tests/log/*.log
+tests/*
+!tests/Makefile
+!tests/srcs

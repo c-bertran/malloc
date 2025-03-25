@@ -15,10 +15,15 @@ OBJS_DIR = objs
 # Source files
 SRCS = $(SRCS_DIR)/calloc.c \
 	$(SRCS_DIR)/free.c \
-	$(SRCS_DIR)/log_operation.c \
+	$(SRCS_DIR)/log.c \
 	$(SRCS_DIR)/malloc.c \
 	$(SRCS_DIR)/realloc.c \
-	$(SRCS_DIR)/show.c
+	$(SRCS_DIR)/show.c \
+	$(SRCS_DIR)/internal/block.c \
+	$(SRCS_DIR)/internal/defrag.c \
+	$(SRCS_DIR)/internal/system.c \
+	$(SRCS_DIR)/internal/validation.c \
+	$(SRCS_DIR)/internal/zone.c
 
 # Object files
 OBJS = $(SRCS:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)
@@ -49,8 +54,9 @@ $(NAME): $(OBJS)
 	@ln -sf $(NAME) $(LINK_NAME)
 
 # Compile source files
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c
 	@echo "Compiling: $<"
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 # Create objects directory

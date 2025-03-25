@@ -1,5 +1,6 @@
 #ifndef FT_MALLOC_H
 #define FT_MALLOC_H
+#include <unistd.h>
 
 /**
  * @brief Allocates memory of the specified size

@@ -109,6 +109,13 @@ void show_alloc_mem(void) {
 
 void show_alloc_mem_ex(void) {
 	pthread_mutex_lock(&g_malloc_mutex);
+
+	if (!g_zones) {
+		ft_putstr("\n===== NO MEMORY ALLOCATIONS =====\n", 1);
+		pthread_mutex_unlock(&g_malloc_mutex);
+		return;
+	}
+
 	size_t total_bytes = 0, total_zones = 0, total_used = 0, total_free = 0,
 	       total_blocks = 0, total_free_blocks = 0, total_max_free_blocks = 0;
 	t_zone *zone = g_zones;
@@ -119,6 +126,18 @@ void show_alloc_mem_ex(void) {
 		total_bytes += zone->total_size;
 
 		t_block *block = zone->blocks;
+		ft_putstr("Zone at ", 1);
+		ft_putaddr(zone, 1);
+		ft_putstr(" (", 1);
+		if (zone->type == ZONE_TINY)
+			ft_putstr("TINY", 1);
+		else if (zone->type == ZONE_SMALL)
+			ft_putstr("SMALL", 1);
+		else
+			ft_putstr("LARGE", 1);
+		ft_putstr("): blocks at ", 1);
+		ft_putaddr(zone->blocks, 1);
+		ft_putstr("\n", 1);
 		while (block) {
 			++total_blocks;
 			if (block->is_free) {
