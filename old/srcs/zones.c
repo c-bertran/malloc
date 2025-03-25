@@ -46,7 +46,9 @@ t_zone *create_zone(zone_type_t type, size_t size) {
 	zone->used_blocks = 0;
 
 	// Create initial free block
-	t_block *block = (t_block *)((char *)addr + sizeof(t_zone));
+	uintptr_t block_addr = (uintptr_t)addr + sizeof(t_zone);
+	block_addr = (block_addr + 15) & ~15;
+	t_block *block = (t_block *)block_addr;
 	block->size = zone_size - sizeof(t_zone) - sizeof(t_block);
 	block->is_free = true;
 	block->next = NULL;

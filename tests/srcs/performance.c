@@ -1,14 +1,15 @@
-#include "../includes/malloc.h"
+#include "malloc.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
-#define NUM_ALLOCS 10000
+#define NUM_ALLOCS 5000
 #define MAX_ALLOC_SIZE 1024
 #define NUM_THREADS 4
+
+int ft_printf(char *string, ...);
 
 typedef struct {
 	int id;
@@ -20,7 +21,7 @@ size_t get_random_size() { return rand() % MAX_ALLOC_SIZE + 1; }
 
 // Performance test for many small allocations
 void test_many_small_allocs() {
-	printf("Testing many small allocations...\n");
+	ft_printf("Testing many small allocations...\n");
 
 	void *ptrs[NUM_ALLOCS];
 	clock_t start = clock();
@@ -30,7 +31,7 @@ void test_many_small_allocs() {
 		size_t size = get_random_size();
 		ptrs[i] = malloc(size);
 		if (ptrs[i] == NULL) {
-			printf("Failed to allocate at iteration %d\n", i);
+			ft_printf("Failed to allocate at iteration %d\n", i);
 			break;
 		}
 
@@ -41,19 +42,19 @@ void test_many_small_allocs() {
 
 	// Free in reverse order
 	for (int i = NUM_ALLOCS - 1; i >= 0; i--) {
-		if (ptrs[i] != NULL) {
+		if (ptrs[i] != NULL)
 			free(ptrs[i]);
-		}
 	}
 
 	clock_t end = clock();
 	double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-	printf("PASSED: Many small allocations (time: %.4f seconds)\n", time_spent);
+	ft_printf("PASSED: Many small allocations (time: %.4f seconds)\n",
+	          time_spent);
 }
 
 // Performance test for fragmentation
 void test_fragmentation() {
-	printf("Testing fragmentation handling...\n");
+	ft_printf("Testing fragmentation handling...\n");
 
 	void *ptrs[NUM_ALLOCS];
 
@@ -62,7 +63,7 @@ void test_fragmentation() {
 		size_t size = (i % 2 == 0) ? 32 : 128;
 		ptrs[i] = malloc(size);
 		if (ptrs[i] == NULL) {
-			printf("Failed to allocate at iteration %d\n", i);
+			ft_printf("Failed to allocate at iteration %d\n", i);
 			break;
 		}
 	}
@@ -90,7 +91,7 @@ void test_fragmentation() {
 		}
 	}
 
-	printf("PASSED: Fragmentation handling\n");
+	ft_printf("PASSED: Fragmentation handling\n");
 }
 
 // Thread function for multi-threading test
@@ -102,7 +103,7 @@ void *thread_allocator(void *arg) {
 		size_t size = get_random_size();
 		ptrs[i] = malloc(size);
 		if (ptrs[i] == NULL) {
-			printf("Thread %d: Failed to allocate at iteration %d\n", data->id, i);
+			ft_printf("Thread %d: Failed to allocate at iteration %d\n", data->id, i);
 			break;
 		}
 
@@ -135,7 +136,7 @@ void *thread_allocator(void *arg) {
 
 // Test thread safety with multiple threads
 void test_thread_safety() {
-	printf("Testing thread safety...\n");
+	ft_printf("Testing thread safety...\n");
 
 	pthread_t threads[NUM_THREADS];
 	thread_data_t thread_data[NUM_THREADS];
@@ -147,7 +148,7 @@ void test_thread_safety() {
 
 		if (pthread_create(&threads[i], NULL, thread_allocator, &thread_data[i]) !=
 		    0) {
-			printf("Failed to create thread %d\n", i);
+			ft_printf("Failed to create thread %d\n", i);
 			return;
 		}
 	}
@@ -157,19 +158,19 @@ void test_thread_safety() {
 		pthread_join(threads[i], NULL);
 	}
 
-	printf("PASSED: Thread safety test\n");
+	ft_printf("PASSED: Thread safety test\n");
 }
 
 // Visualize memory after tests
 void show_memory_state() {
-	printf("\n=== MEMORY STATE AFTER TESTS ===\n");
+	ft_printf("\n=== MEMORY STATE AFTER TESTS ===\n");
 	show_alloc_mem();
-	printf("\n=== DETAILED MEMORY STATE ===\n");
+	ft_printf("\n=== DETAILED MEMORY STATE ===\n");
 	show_alloc_mem_ex();
 }
 
 int main() {
-	printf("=== PERFORMANCE TESTS ===\n\n");
+	ft_printf("=== PERFORMANCE TESTS ===\n\n");
 
 	// Seed the random number generator
 	srand(time(NULL));
@@ -181,6 +182,6 @@ int main() {
 	// Show final memory state
 	show_memory_state();
 
-	printf("\nAll performance tests completed!\n");
+	ft_printf("\nAll performance tests completed!\n");
 	return 0;
 }

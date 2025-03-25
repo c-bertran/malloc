@@ -1,7 +1,7 @@
 #include "malloc.h"
 #include "malloc_internal.h"
 
-static void ft_putnbr(size_t n, int base, char *charset, int fd) {
+void ft_putnbr(size_t n, int base, char *charset, int fd) {
 	char buffer[32];
 	int i = 0;
 
@@ -17,7 +17,7 @@ static void ft_putnbr(size_t n, int base, char *charset, int fd) {
 	}
 }
 
-static void ft_putstr(char *str, int fd) {
+void ft_putstr(char *str, int fd) {
 	while (*str)
 		write(fd, str++, 1);
 }
@@ -108,10 +108,9 @@ void show_alloc_mem(void) {
 }
 
 void show_alloc_mem_ex(void) {
+	pthread_mutex_lock(&g_malloc_mutex);
 	size_t total_bytes = 0, total_zones = 0, total_used = 0, total_free = 0,
 	       total_blocks = 0, total_free_blocks = 0, total_max_free_blocks = 0;
-
-	pthread_mutex_lock(&g_malloc_mutex);
 	t_zone *zone = g_zones;
 
 	ft_putstr("\n===== MEMORY BLOCK DETAIL =====\n", 1);

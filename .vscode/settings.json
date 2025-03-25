@@ -7,7 +7,12 @@
 		"resource.h": "c",
 		"pthread.h": "c",
 		"mman.h": "c",
-		"malloc.h": "c"
+		"malloc.h": "c",
+		"stdarg.h": "c",
+		"assert.h": "c",
+		"types.h": "c",
+		"stdbool.h": "c",
+		"stdint.h": "c"
 	},
 	"editor.detectIndentation": false,
 	"editor.formatOnSave": true,

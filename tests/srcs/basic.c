@@ -1,12 +1,12 @@
-#include "../includes/malloc.h"
-#include "../includes/malloc_internal.h"
+#include "malloc.h"
 #include <assert.h>
-#include <stdio.h>
 #include <string.h>
+
+int ft_printf(char *string, ...);
 
 // Test basic malloc and free
 void test_simple_malloc_free() {
-	printf("Testing simple malloc and free...\n");
+	ft_printf("Testing simple malloc and free...\n");
 
 	// Allocate memory
 	int *ptr = (int *)malloc(sizeof(int) * 10);
@@ -24,12 +24,12 @@ void test_simple_malloc_free() {
 
 	// Free memory
 	free(ptr);
-	printf("PASSED: Simple malloc and free\n");
+	ft_printf("PASSED: Simple malloc and free\n");
 }
 
 // Test calloc initialization
 void test_calloc() {
-	printf("Testing calloc...\n");
+	ft_printf("Testing calloc...\n");
 
 	// Allocate memory with calloc
 	int *ptr = (int *)calloc(10, sizeof(int));
@@ -42,12 +42,12 @@ void test_calloc() {
 
 	// Free memory
 	free(ptr);
-	printf("PASSED: Calloc initialization\n");
+	ft_printf("PASSED: Calloc initialization\n");
 }
 
 // Test realloc functionality
 void test_realloc() {
-	printf("Testing realloc...\n");
+	ft_printf("Testing realloc...\n");
 
 	// Initial allocation
 	int *ptr = (int *)malloc(sizeof(int) * 5);
@@ -83,12 +83,12 @@ void test_realloc() {
 
 	// Free memory
 	free(new_ptr);
-	printf("PASSED: Realloc functionality\n");
+	ft_printf("PASSED: Realloc functionality\n");
 }
 
 // Test different allocation sizes
 void test_allocation_sizes() {
-	printf("Testing various allocation sizes...\n");
+	ft_printf("Testing various allocation sizes...\n");
 
 	// Test tiny allocations (< 128 bytes)
 	char *tiny = (char *)malloc(64);
@@ -110,17 +110,17 @@ void test_allocation_sizes() {
 	large[2047] = '\0';
 	free(large);
 
-	printf("PASSED: Various allocation sizes\n");
+	ft_printf("PASSED: Various allocation sizes\n");
 }
 
 int main() {
-	printf("=== BASIC MALLOC TESTS ===\n\n");
+	ft_printf("=== BASIC MALLOC TESTS ===\n\n");
 
 	test_simple_malloc_free();
 	test_calloc();
 	test_realloc();
 	test_allocation_sizes();
 
-	printf("\nAll basic tests passed!\n");
+	ft_printf("\nAll basic tests passed!\n");
 	return 0;
 }

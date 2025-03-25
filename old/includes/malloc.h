@@ -1,5 +1,6 @@
 #ifndef FT_MALLOC_H
 #define FT_MALLOC_H
+#include <sys/types.h>
 
 /**
  * @brief Allocates memory of the specified size
@@ -48,6 +49,19 @@ void *realloc(void *ptr, size_t size);
  * @return void* Pointer to the allocated memory
  */
 void *calloc(size_t nmemb, size_t size);
+
+/**
+ * @brief Allocates aligned memory
+ *
+ * This function allocates size bytes of memory aligned to the specified
+ * alignment. The alignment must be a power of two and a multiple of
+ * sizeof(void*).
+ *
+ * @param alignment Alignment in bytes
+ * @param size Size in bytes to allocate
+ * @return void* Pointer to the allocated memory
+ */
+void *aligned_alloc(size_t alignment, size_t size);
 
 /**
  * @brief Displays information about allocated memory

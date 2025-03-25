@@ -1,10 +1,12 @@
-#include "../includes/malloc.h"
+#include "malloc.h"
 #include <assert.h>
-#include <stdio.h>
+#include <unistd.h>
+
+int ft_printf(char *string, ...);
 
 // Test NULL pointer handling
 void test_null_pointers() {
-	printf("Testing NULL pointer handling...\n");
+	ft_printf("Testing NULL pointer handling...\n");
 
 	// Free NULL should do nothing
 	free(NULL);
@@ -14,12 +16,12 @@ void test_null_pointers() {
 	assert(ptr != NULL);
 	free(ptr);
 
-	printf("PASSED: NULL pointer handling\n");
+	ft_printf("PASSED: NULL pointer handling\n");
 }
 
 // Test zero-size allocations
 void test_zero_size() {
-	printf("Testing zero-size allocations...\n");
+	ft_printf("Testing zero-size allocations...\n");
 
 	// malloc(0) should return NULL or a small allocation
 	void *ptr = malloc(0);
@@ -39,12 +41,12 @@ void test_zero_size() {
 	void *new_ptr = realloc(ptr, 0);
 	assert(new_ptr == NULL);
 
-	printf("PASSED: Zero-size allocations\n");
+	ft_printf("PASSED: Zero-size allocations\n");
 }
 
 // Test very large allocations
 void test_large_allocations() {
-	printf("Testing large allocations...\n");
+	ft_printf("Testing large allocations...\n");
 
 	// Try a very large allocation (will likely fail, but shouldn't crash)
 	void *large_ptr = malloc(1024 * 1024 * 1024); // 1GB
@@ -55,24 +57,24 @@ void test_large_allocations() {
 		ptr[0] = 'A';
 		ptr[1024 * 1024 * 1024 - 1] = 'Z';
 		free(large_ptr);
-		printf("PASSED: Large allocation (1GB)\n");
+		ft_printf("PASSED: Large allocation (1GB)\n");
 	} else {
-		printf("SKIPPED: Large allocation (1GB) - insufficient memory\n");
+		ft_printf("SKIPPED: Large allocation (1GB) - insufficient memory\n");
 	}
 
 	// More reasonable large allocation
 	void *medium_ptr = malloc(10 * 1024 * 1024); // 10MB
 	if (medium_ptr != NULL) {
 		free(medium_ptr);
-		printf("PASSED: Medium large allocation (10MB)\n");
+		ft_printf("PASSED: Medium large allocation (10MB)\n");
 	} else {
-		printf("FAILED: Medium large allocation (10MB)\n");
+		ft_printf("FAILED: Medium large allocation (10MB)\n");
 	}
 }
 
 // Test double free detection (should not crash)
 void test_double_free() {
-	printf("Testing double free behavior...\n");
+	ft_printf("Testing double free behavior...\n");
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuse-after-free"
@@ -87,12 +89,12 @@ void test_double_free() {
 	}
 #pragma GCC diagnostic pop
 
-	printf("PASSED: Double free handling\n");
+	ft_printf("PASSED: Double free handling\n");
 }
 
 // Test invalid pointer to free
 void test_invalid_free() {
-	printf("Testing invalid free behavior...\n");
+	ft_printf("Testing invalid free behavior...\n");
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfree-nonheap-object"
@@ -120,11 +122,11 @@ void test_invalid_free() {
 	// Clean up valid pointer
 	free(ptr);
 
-	printf("PASSED: Invalid free handling\n");
+	ft_printf("PASSED: Invalid free handling\n");
 }
 
 int main() {
-	printf("=== EDGE CASE TESTS ===\n\n");
+	ft_printf("=== EDGE CASE TESTS ===\n\n");
 
 	test_null_pointers();
 	test_zero_size();
@@ -132,6 +134,6 @@ int main() {
 	test_double_free();
 	test_invalid_free();
 
-	printf("\nAll edge case tests passed!\n");
+	ft_printf("\nAll edge case tests passed!\n");
 	return 0;
 }

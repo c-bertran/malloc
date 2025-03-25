@@ -1,24 +1,45 @@
-#ifndef MALLOC_INTERNAL_H
-#define MALLOC_INTERNAL_H
+#ifndef FT_MALLOC_INTERNAL_H
+#define FT_MALLOC_INTERNAL_H
 #include <limits.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
 
-/* Debug flag */
-#define DEBUG_MALLOC 1
+#ifndef DEBUG_MALLOC
+/**
+ * @brief Enable debug output for memory allocation operations
+ * @note Set to 1 to activate debug output
+ */
+#define DEBUG_MALLOC 0
+#endif
 
-/* Size definitions */
+/* Tiny size */
 #define TINY_MAX_SIZE 128
+/* Small size */
 #define SMALL_MAX_SIZE 1024
-
-/* Each zone must contain at least 100 allocations */
+/* Minimum allocation per zone */
 #define MIN_ALLOC_PER_ZONE 100
-
-/* Magic number (Traditionally used to mark freed memory ("dead" memory)) */
+/* Magic number of freed memory */
 #define MAGIC_NUMBER 0xDEADBEEF
+
+/* Standard 16-byte memory alignment */
+#define MALLOC_ALIGNMENT 16
+/* Macro to align size up to alignment boundary */
+#define ALIGN(size)                                                            \
+	(((size) + (MALLOC_ALIGNMENT - 1)) & ~(MALLOC_ALIGNMENT - 1))
+/* Page size using sysconf(_SC_PAGESIZE) for Linux */
+#define PAGE_SIZE (sysconf(_SC_PAGESIZE))
+/* Zone size calculations for pre-allocation */
+#define TINY_ZONE_SIZE                                                         \
+	(PAGE_SIZE * ((TINY_MAX_SIZE * MIN_ALLOC_PER_ZONE) / PAGE_SIZE + 1))
+#define SMALL_ZONE_SIZE                                                        \
+	(PAGE_SIZE * ((SMALL_MAX_SIZE * MIN_ALLOC_PER_ZONE) / PAGE_SIZE + 1))
+/* Block size calculations */
+#define BLOCK_METADATA_SIZE (offsetof(t_block, padding))
+#define BLOCK_TOTAL_SIZE(user_size) (ALIGN(BLOCK_METADATA_SIZE + (user_size)))
 
 /* Zone types */
 typedef enum { ZONE_TINY, ZONE_SMALL, ZONE_LARGE } zone_type_t;
@@ -28,16 +49,14 @@ typedef enum { ZONE_TINY, ZONE_SMALL, ZONE_LARGE } zone_type_t;
  * Must be aligned to ensure proper alignment of user data
  */
 typedef struct s_block {
-	size_t size;          /* Size of the data area */
-	bool is_free;         /* Indicates if block is free */
 	struct s_block *next; /* Next block in the zone */
 	struct s_block *prev; /* Previous block in the zone */
-	__uint32_t magic;     /* Magic number for validation */
-	/* Padding for alignment */
-	char padding[0]; /* Start of user data */
+	size_t size;          /* Size of the data area */
+	uint32_t magic;       /* Magic number for validation */
+	bool is_free;         /* Indicates if block is free */
+	size_t offset;        /* Offset from start of zone */
+	char padding[0];      /* Start of user data */
 } t_block;
-
-#define BLOCK_HEADER_SIZE ((size_t)(&((t_block *)0)->padding))
 
 /*
  * Zone structure - manages a contiguous memory region
@@ -56,93 +75,9 @@ typedef struct s_zone {
 extern t_zone *g_zones;                /* Head of zones list */
 extern pthread_mutex_t g_malloc_mutex; /* Mutex for thread safety */
 
-/* Internal helper functions */
-
 /**
- * @brief Initialize the memory allocator
- * @return true if initialization succeeds, false otherwise
+ * @brief Log memory allocation operation
  */
-bool init_malloc(void);
-
-/**
- * @brief Get the appropriate zone type for a given size
- * @param size Size in bytes
- * @return The zone type (TINY, SMALL, or LARGE)
- */
-zone_type_t get_zone_type(size_t size);
-
-/**
- * @brief Core allocation function
- * @param size Size requested by user
- * @return Pointer to allocated memory or NULL on failure
- */
-void *internal_allocation_logic(size_t size);
-
-/**
- * @brief Create a new zone of specified type
- * @param type Zone type
- * @param size Size needed (used for LARGE zones)
- * @return Pointer to new zone, or NULL if allocation fails
- */
-t_zone *create_zone(zone_type_t type, size_t size);
-
-/**
- * @brief Find a suitable free block in a zone
- * @param zone Zone to search
- * @param size Size needed
- * @return Pointer to block header if found, NULL otherwise
- */
-t_block *find_free_block_in_zone(t_zone *zone, size_t size);
-
-/**
- * @brief Split block if it's significantly larger than needed
- * @param block Block to split
- * @param size Size needed
- * @return true if split was performed, false otherwise
- */
-bool split_block(t_block *block, size_t size);
-
-/**
- * @brief Merge adjacent free blocks to reduce fragmentation
- * @param block Starting block to check for merging
- * @return Pointer to the merged block
- */
-t_block *merge_blocks(t_block *block);
-
-/**
- * @brief Get the zone containing a given pointer
- * @param ptr Pointer to check
- * @return Zone containing the pointer, or NULL if invalid
- */
-t_zone *find_zone_for_ptr(void *ptr);
-
-/**
- * @brief Get the block header for a given user pointer
- * @param ptr User data pointer
- * @return Block header pointer, or NULL if invalid
- */
-t_block *get_block_from_ptr(void *ptr);
-
-/**
- * @brief Align size to system word boundary
- * @param size Size to align
- * @return Aligned size
- */
-size_t align_size(size_t size);
-
-/**
- * @brief Check if a pointer is valid for deallocation
- * @param ptr Pointer to validate
- * @return true if pointer is valid, false otherwise
- */
-bool is_valid_ptr(void *ptr);
-
-/**
- * @brief Log an allocation operation (for debugging)
- * @param operation Operation name (malloc, free, realloc)
- * @param ptr Pointer involved
- * @param size Size involved
- */
-void log_operation(const char *operation, void *ptr, size_t size);
+void log(const char *operation, void *ptr, size_t size);
 
 #endif

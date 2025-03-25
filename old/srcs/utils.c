@@ -21,9 +21,36 @@ t_zone *find_zone_for_ptr(void *ptr) {
 	return NULL;
 }
 
-// Calculate block address from user pointer
 t_block *get_block_from_ptr(void *ptr) {
-	return (t_block *)((char *)ptr - BLOCK_HEADER_SIZE);
+	if (!ptr)
+		return NULL;
+
+	t_zone *zone = find_zone_for_ptr(ptr);
+	if (!zone)
+		return NULL;
+
+	uintptr_t zone_start = (uintptr_t)zone->start;
+	uintptr_t zone_end = zone_start + zone->total_size;
+	uintptr_t ptr_addr = (uintptr_t)ptr;
+	uintptr_t block_addr = ptr_addr - BLOCK_HEADER_SIZE;
+
+	if (block_addr >= zone_start && block_addr < zone_end) {
+		t_block *block = (t_block *)block_addr;
+		if (block->magic == MAGIC_NUMBER) {
+			return block;
+		}
+	}
+
+	t_block *block = zone->blocks;
+	while (block) {
+		if (block_addr < zone_start || block_addr >= zone_end)
+			break;
+		if (block->magic == MAGIC_NUMBER && (void *)&block->padding == ptr)
+			return block;
+		block = block->next;
+	}
+
+	return NULL;
 }
 
 bool is_valid_ptr(void *ptr) {
@@ -111,5 +138,9 @@ void log_operation(const char *operation, void *ptr, size_t size) {
 
 	// Write the log message
 	write(2, buffer, pos); // Write to stderr
+#else
+	(void)operation;
+	(void)ptr;
+	(void)size;
 #endif
 }
