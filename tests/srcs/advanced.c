@@ -117,12 +117,15 @@ void test_database_pattern() {
 
 volatile int timer_elapsed = 0;
 
-void timer_handler(int sig) { timer_elapsed = 1; }
+void timer_handler(int sig) {
+	(void)sig;
+	timer_elapsed = 1;
+}
 
 void test_long_running() {
 	ft_printf("Running long-duration stability test...\n");
 
-	// Set up timer for 30 seconds
+	// Set up timer for 10 seconds
 	struct itimerval timer;
 	timer.it_value.tv_sec = 10; // 10-second test
 	timer.it_value.tv_usec = 0;
@@ -136,6 +139,8 @@ void test_long_running() {
 #define MAX_PTRS 1000
 	void *ptrs[MAX_PTRS] = {0};
 	size_t sizes[MAX_PTRS] = {0};
+	unsigned char patterns[MAX_PTRS] = {
+	  0}; // To store the pattern used for each allocation
 	int count = 0;
 
 	int iterations = 0;
@@ -151,15 +156,18 @@ void test_long_running() {
 			ptrs[count] = malloc(size);
 			if (ptrs[count]) {
 				sizes[count] = size;
+				// Store the pattern value
+				unsigned char pattern = (iterations + count) % 256;
+				patterns[count] = pattern;
 				// Write to memory to check for corruption
-				memset(ptrs[count], (iterations + count) % 256, sizes[count]);
+				memset(ptrs[count], pattern, sizes[count]);
 				count++;
 			}
 		} else if (count > 0) {
 			// Free
 			int idx = rand() % count;
-			// Check memory integrity
-			unsigned char expected = (iterations - 1 + idx) % 256;
+			// Check memory integrity using the stored pattern
+			unsigned char expected = patterns[idx];
 			unsigned char *p = (unsigned char *)ptrs[idx];
 			for (size_t j = 0; j < sizes[idx] && j < 100; j++) {
 				if (p[j] != expected) {
@@ -175,6 +183,8 @@ void test_long_running() {
 			// Move last pointer to this slot
 			ptrs[idx] = ptrs[count - 1];
 			sizes[idx] = sizes[count - 1];
+			patterns[idx] =
+			  patterns[count - 1]; // Don't forget to also move the pattern
 			count--;
 		}
 	}
@@ -197,7 +207,7 @@ void test_comparative_performance() {
 #define COMP_SIZE 128
 
 	clock_t start, end;
-	double our_time, sys_time;
+	double our_time;
 
 	// First, test our malloc
 	start = clock();
@@ -247,8 +257,8 @@ void test_interoperability() {
 	}
 
 	// Clean up
-	free(dup);
 	remove_alloc(dup);
+	free(dup);
 
 	ft_printf("PASSED: Interoperability test\n");
 }
@@ -256,6 +266,7 @@ void test_interoperability() {
 // ======== 5. Signal Safety Tests ========
 
 void signal_handler(int sig) {
+	(void)sig;
 	// Allocate memory from within signal handler
 	void *ptr = malloc(128);
 	free(ptr);
@@ -279,10 +290,10 @@ void test_signal_handling() {
 	record_alloc(ptr2, 512, "After signal");
 
 	// Clean up
-	free(ptr);
 	remove_alloc(ptr);
-	free(ptr2);
+	free(ptr);
 	remove_alloc(ptr2);
+	free(ptr2);
 
 	ft_printf("PASSED: Signal handling test\n");
 }

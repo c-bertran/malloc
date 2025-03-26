@@ -37,7 +37,7 @@ advanced: test_advanced
 
 gnl: test_gnl
 	@echo "Running GNL test..."
-	@env LD_LIBRARY_PATH=.. bash ./gnl/test.bash
+	@env LD_LIBRARY_PATH=.. ./test_gnl $(SRCS_DIR)/gnl/
 
 # Build test executables
 test_basic: $(SRCS_DIR)/basic.c $(SRCS_DIR)/printf.c
@@ -58,8 +58,8 @@ test_absurd: $(SRCS_DIR)/absurd.c $(SRCS_DIR)/printf.c
 test_advanced: $(SRCS_DIR)/advanced.c $(SRCS_DIR)/printf.c
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_gnl: $(SRCS_DIR)/gnl/gnl.c $(SRCS_DIR)/printf.c
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+test_gnl: $(SRCS_DIR)/gnl/gnl.c $(SRCS_DIR)/gnl/main.c $(SRCS_DIR)/printf.c
+	$(CC) $(CFLAGS) -I$(SRCS_DIR)/gnl -o $@ $^ $(LDFLAGS)
 
 clean:
 	rm -f test_basic test_edge_cases test_performance test_thread test_absurd test_advanced test_gnl
