@@ -45,11 +45,12 @@ t_block *split_block(t_block *block, size_t size) {
 }
 
 t_block *merge_blocks(t_block *block) {
-	if (!block->is_free)
+	if (!block || !block->is_free)
 		return block;
 
 	// Merge with next block if it's free
-	if (block->next && block->next->is_free) {
+	if (block->next && block->next->magic == MAGIC_NUMBER &&
+	    block->next->is_free) {
 		block->size += BLOCK_METADATA_SIZE + block->next->size;
 		block->next = block->next->next;
 		if (block->next)
@@ -57,7 +58,8 @@ t_block *merge_blocks(t_block *block) {
 	}
 
 	// Merge with previous block if it's free
-	if (block->prev && block->prev->is_free) {
+	if (block->prev && block->prev->magic == MAGIC_NUMBER &&
+	    block->prev->is_free) {
 		block->prev->size += BLOCK_METADATA_SIZE + block->size;
 		block->prev->next = block->next;
 		if (block->next)

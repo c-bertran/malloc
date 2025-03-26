@@ -2,12 +2,12 @@
 #include "malloc_internal.h"
 
 void free(void *ptr) {
-	pthread_mutex_lock(&g_malloc_mutex);
 	if (!ptr) {
 		logger("free", NULL, 0);
-		pthread_mutex_unlock(&g_malloc_mutex);
 		return;
 	}
+
+	pthread_mutex_lock(&g_malloc_mutex);
 	t_zone *zone = find_zone_containing(ptr);
 	if (!zone) {
 		pthread_mutex_unlock(&g_malloc_mutex);
@@ -19,6 +19,9 @@ void free(void *ptr) {
 		pthread_mutex_unlock(&g_malloc_mutex);
 		return;
 	}
+
+	t_bool should_defrag =
+	  (zone->type != ZONE_LARGE) ? calculate_fragmentation(zone) > 1.5f : FALSE;
 	block->is_free = true;
 	zone->used_blocks--;
 	zone->free_space += block->size + BLOCK_METADATA_SIZE;
@@ -34,7 +37,7 @@ void free(void *ptr) {
 				prev->next = zone->next;
 		}
 		munmap(zone, zone->total_size);
-	} else if (calculate_fragmentation(zone) > 1.5f)
+	} else if (should_defrag)
 		defragment_memory();
 	logger("free", ptr, 0);
 	pthread_mutex_unlock(&g_malloc_mutex);

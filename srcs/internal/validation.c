@@ -1,7 +1,7 @@
 #include "malloc.h"
 #include "malloc_internal.h"
 
-bool is_valid_pointer(void *ptr) {
+t_bool is_valid_pointer(void *ptr) {
 	if (!ptr)
 		return false;
 
@@ -15,7 +15,7 @@ bool is_valid_pointer(void *ptr) {
 	return verify_block(block);
 }
 
-bool verify_block(t_block *block) {
+t_bool verify_block(t_block *block) {
 	if (!block)
 		return false;
 

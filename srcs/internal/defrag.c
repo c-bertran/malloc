@@ -33,120 +33,34 @@ float calculate_fragmentation(t_zone *zone) {
 }
 
 /**
- * Defragment a specific zone by moving blocks
- * Returns true if defragmentation improved fragmentation
- */
-static bool defragment_zone(t_zone *zone) {
-	if (!zone || zone->type == ZONE_LARGE)
-		return false;
-
-	// Calculate initial fragmentation
-	float initial_frag = calculate_fragmentation(zone);
-	if (initial_frag < 1.5f) // Low fragmentation threshold
-		return false;
-
-	// Temporary buffer for storing block data during moves
-	char buffer[SMALL_MAX_SIZE];
-
-	// First block position after zone header
-	size_t next_position = sizeof(t_zone);
-
-	// First pass: move allocated blocks to beginning
-	t_block *block = zone->blocks;
-	t_block *new_head = NULL;
-	t_block *last_block = NULL;
-
-	while (block) {
-		t_block *next = block->next;
-
-		if (!block->is_free) {
-			// Save block data
-			size_t data_size = block->size;
-			block_memcpy(buffer, (char *)block + BLOCK_METADATA_SIZE, data_size);
-
-			// If block isn't already at the expected position
-			if (block->offset != next_position) {
-				// Create new block at the consolidated position
-				t_block *new_block = (t_block *)((char *)zone + next_position);
-
-				// Initialize new block
-				new_block->size = data_size;
-				new_block->is_free = false;
-				new_block->magic = MAGIC_NUMBER;
-				new_block->offset = next_position;
-				new_block->next = NULL;
-				new_block->prev = last_block;
-
-				// Copy data to new position
-				block_memcpy((char *)new_block + BLOCK_METADATA_SIZE, buffer,
-				             data_size);
-
-				// Update linked list
-				if (last_block)
-					last_block->next = new_block;
-				else
-					new_head = new_block;
-
-				last_block = new_block;
-			} else {
-				// Block is already at the right position
-				if (last_block)
-					last_block->next = block;
-				else
-					new_head = block;
-
-				block->prev = last_block;
-				block->next = NULL;
-				last_block = block;
-			}
-
-			next_position += BLOCK_METADATA_SIZE + ALIGN(data_size);
-		}
-
-		block = next;
-	}
-
-	// Create single large free block at the end if there's space
-	if (next_position < zone->total_size) {
-		t_block *free_block = (t_block *)((char *)zone + next_position);
-		free_block->size = zone->total_size - next_position - BLOCK_METADATA_SIZE;
-		free_block->is_free = true;
-		free_block->magic = MAGIC_NUMBER;
-		free_block->offset = next_position;
-		free_block->next = NULL;
-		free_block->prev = last_block;
-
-		if (last_block)
-			last_block->next = free_block;
-		else
-			new_head = free_block;
-	}
-
-	// Update zone metadata
-	zone->blocks = new_head;
-
-	// Calculate final fragmentation
-	float final_frag = calculate_fragmentation(zone);
-
-	return final_frag < initial_frag;
-}
-
-/**
  * Defragment memory by consolidating free blocks
  * Returns number of zones defragmented
  */
 int defragment_memory(void) {
-	pthread_mutex_lock(&g_malloc_mutex);
-
 	int zones_defragged = 0;
 	t_zone *zone = g_zones;
 
 	while (zone) {
-		if (defragment_zone(zone))
+		t_zone *next_zone = zone->next;
+		t_block *block = zone->blocks;
+
+		t_bool coalesced = false;
+		while (block) {
+			t_block *next_block = block->next;
+			// Merge adjacent free blocks
+			if (block->is_free && next_block && next_block->is_free) {
+				block->size += BLOCK_METADATA_SIZE + next_block->size;
+				block->next = next_block->next;
+				if (next_block->next)
+					next_block->next->prev = block;
+				coalesced = true;
+			}
+			block = block->next;
+		}
+		if (coalesced)
 			zones_defragged++;
-		zone = zone->next;
+		zone = next_zone;
 	}
 
-	pthread_mutex_unlock(&g_malloc_mutex);
 	return zones_defragged;
 }

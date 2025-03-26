@@ -1,5 +1,6 @@
 #ifndef FT_MALLOC_INTERNAL_H
 #define FT_MALLOC_INTERNAL_H
+#include "bool.h"
 #include <limits.h>
 #include <pthread.h>
 #include <stdbool.h>
@@ -41,7 +42,7 @@
 /* Block size calculations */
 #define BLOCK_METADATA_SIZE                                                    \
 	(sizeof(struct s_block *) + sizeof(struct s_block *) + sizeof(size_t) +      \
-	 sizeof(uint32_t) + sizeof(bool) + sizeof(size_t))
+	 sizeof(uint32_t) + sizeof(t_bool) + sizeof(size_t))
 #define BLOCK_TOTAL_SIZE(user_size) (ALIGN(BLOCK_METADATA_SIZE + (user_size)))
 
 /* Get appropriate zone type for allocation size */
@@ -65,7 +66,7 @@ typedef struct s_block {
 	struct s_block *prev; /* Previous block in the zone */
 	size_t size;          /* Size of the data area */
 	uint32_t magic;       /* Magic number for validation */
-	bool is_free;         /* Indicates if block is free */
+	t_bool is_free;       /* Indicates if block is free */
 	size_t offset;        /* Offset from start of zone */
 	char padding[0];      /* Start of user data */
 } t_block;
@@ -158,6 +159,12 @@ void *block_memset(void *s, int c, size_t n);
 void init_malloc_system(void);
 
 /**
+ * Get the maximum allowed allocation size (cached)
+ * This avoids repeated getrlimit calls
+ */
+size_t get_max_allocation_size(void);
+
+/**
  * Get appropriate zone type for allocation size
  */
 zone_type_t get_zone_type(size_t size);
@@ -171,12 +178,12 @@ size_t calculate_needed_size(size_t user_size);
 /**
  * Check if a pointer is a valid allocated block
  */
-bool is_valid_pointer(void *ptr);
+t_bool is_valid_pointer(void *ptr);
 
 /**
  * Verify block integrity (check magic number, etc.)
  */
-bool verify_block(t_block *block);
+t_bool verify_block(t_block *block);
 
 // Memory
 #endif

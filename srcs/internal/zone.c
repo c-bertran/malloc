@@ -45,25 +45,30 @@ t_zone *create_zone(zone_type_t type, size_t size) {
 }
 
 t_zone *find_zone_for_size(size_t size) {
-	// Using the GET_ZONE_TYPE macro
 	zone_type_t type = GET_ZONE_TYPE(size);
 	t_zone *zone = g_zones;
 
-	// First pass: look for existing zone with enough space
 	while (zone) {
-		if (zone->type == type && zone->free_space >= size)
-			return zone;
+		if (zone->type == type && zone->free_space >= size) {
+			t_block *block = find_free_block(zone, size);
+			if (block)
+				return zone;
+		}
 		zone = zone->next;
 	}
 
-	// No suitable zone found, create new one
 	size_t zone_size;
-	if (type == ZONE_TINY)
+	switch (type) {
+	case ZONE_TINY:
 		zone_size = TINY_ZONE_SIZE;
-	else if (type == ZONE_SMALL)
+		break;
+	case ZONE_SMALL:
 		zone_size = SMALL_ZONE_SIZE;
-	else
+		break;
+	case ZONE_LARGE:
+	default:
 		zone_size = ALIGN(size + sizeof(t_zone) + BLOCK_METADATA_SIZE);
+	}
 
 	return create_zone(type, zone_size);
 }
