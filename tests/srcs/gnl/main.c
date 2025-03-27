@@ -9,7 +9,7 @@ int ft_printf(char *string, ...);
 
 void test_file(char *base, const char *filename) {
 	char path[1000];
-	
+
 	strcpy(path, base);
 	strcat(path, filename);
 	ft_printf("Testing file: %s\n", path);
